@@ -5,6 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Choreography Music Editor</title>
     <style>
+        /* Loading indicator */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+
+        #loadingScreen h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -578,6 +613,13 @@
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <h2>🎵 Choreography Music Editor</h2>
+        <div class="spinner"></div>
+        <p style="margin-top: 20px;">Loading...</p>
+    </div>
+
     <div class="container">
         <h1>🎵 Choreography Music Editor</h1>
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -872,6 +914,12 @@
                 
                 const url = URL.createObjectURL(file);
                 audioPlayer = document.getElementById('audioPlayer');
+                
+                // Remove old event listeners to prevent duplicates
+                const newPlayer = audioPlayer.cloneNode(true);
+                audioPlayer.parentNode.replaceChild(newPlayer, audioPlayer);
+                audioPlayer = newPlayer;
+                
                 audioPlayer.src = url;
 
                 document.getElementById('uploadSection').style.display = 'none';
@@ -879,6 +927,7 @@
                 document.getElementById('controls').style.display = 'block';
                 document.getElementById('historySection').style.display = 'block';
 
+                // Add event listeners only once
                 audioPlayer.addEventListener('loadedmetadata', function() {
                     audioDuration = audioPlayer.duration;
                     updateStats();
@@ -886,7 +935,7 @@
                     
                     // Ask for project name AFTER music is loaded
                     document.getElementById('projectNameModal').style.display = 'flex';
-                });
+                }, { once: true });
 
                 audioPlayer.addEventListener('timeupdate', function() {
                     updateTimeline();
@@ -1824,6 +1873,28 @@
                 loadProjectsList();
             }
         }
+
+        // ==================== PAGE INITIALIZATION ====================
+        
+        // Hide loading screen when everything is ready
+        window.addEventListener('load', function() {
+            // Hide loading screen after a short delay
+            setTimeout(function() {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }, 500);
+        });
+
+        // Check login status when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const loggedIn = sessionStorage.getItem('isLoggedIn');
+            if (loggedIn === 'true') {
+                isLoggedIn = true;
+                document.getElementById('loginModal').style.display = 'none';
+                initializeApp();
+            } else {
+                document.getElementById('loginModal').style.display = 'flex';
+            }
+        });
     </script>
 </body>
 </html>
