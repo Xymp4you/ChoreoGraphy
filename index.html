@@ -992,12 +992,12 @@
             const start = currentTime; // Start at current position
             const end = Math.min(audioDuration, currentTime + 5); // End 5 seconds later
             
-            // Show current position
+            // Show current position in mm:ss format
             document.getElementById('currentPositionDisplay').textContent = formatTime(currentTime);
             
-            // Open modal with suggested times based on current position
-            document.getElementById('modalStart').value = Math.floor(start);
-            document.getElementById('modalEnd').value = Math.ceil(end);
+            // Open modal with suggested times in mm:ss format
+            document.getElementById('modalStart').value = formatTime(start);
+            document.getElementById('modalEnd').value = formatTime(end);
             document.getElementById('modalName').value = '';
             document.getElementById('markModal').style.display = 'flex';
         }
